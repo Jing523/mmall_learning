@@ -41,11 +41,15 @@ public class UserServiceImpl implements IUserService {
         return ServerResponse.createBySuccess("登录成功", user);
     }
 
+//    public static void main(String[] args) {
+//        UserServiceImpl userService = new UserServiceImpl();
+//        userService.login("jing", "jing");
+//    }
     public ServerResponse<String> register(User user) {
-//        int resultCount = userMapper.checkUsername(user.getUsername());
-//        if(resultCount > 0) {
-//            return ServerResponse.createByErrorMessage("用户名已存在");
-//        }
+        int resultCount = userMapper.checkUsername(user.getUsername());
+        if(resultCount > 0) {
+            return ServerResponse.createByErrorMessage("用户名已存在");
+        }
 
         ServerResponse validResponse = this.checkValid(user.getUsername(), Const.USERNAME);
         if(!validResponse.isSuccess()) {
@@ -56,16 +60,16 @@ public class UserServiceImpl implements IUserService {
         if(!validResponse.isSuccess()) {
             return validResponse;
         }
-//        resultCount = userMapper.checkEmail(user.getEmail());
-//        if(resultCount > 0) {
-//            return ServerResponse.createByErrorMessage("email已存在");
-//        }
+        resultCount = userMapper.checkEmail(user.getEmail());
+        if(resultCount > 0) {
+            return ServerResponse.createByErrorMessage("email已存在");
+        }
 
         user.setRole(Const.Role.ROLE_CUSTOMER);
         //MD5加密
         user.setPassword(MD5Util.MD5EncodeUtf8(user.getPassword()));
 
-        int resultCount = userMapper.insert(user);
+        resultCount = userMapper.insert(user);
         if(resultCount == 0) {
             return ServerResponse.createByErrorMessage("注册失败");
         }
@@ -152,7 +156,7 @@ public class UserServiceImpl implements IUserService {
 
     public ServerResponse<String> resetPassword(String passwordOld, String passwordNew, User user) {
         int resultCount = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld), user.getId());
-        if(resultCount > 0) {
+        if(resultCount == 0) {
             return ServerResponse.createByErrorMessage("旧密码错误");
         }
 
@@ -193,5 +197,13 @@ public class UserServiceImpl implements IUserService {
         }
         user.setPassword(StringUtils.EMPTY);
         return ServerResponse.createBySuccess(user);
+    }
+
+    //校验是否是管理员
+    public ServerResponse checkAdminRole(User user) {
+        if(user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN) {
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
     }
 }
