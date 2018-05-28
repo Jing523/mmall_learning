@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 /**
  * Created by jingwang on 19/4/18.
  */
-public class ProductListVO {
+public class ProductListVo {
     private Integer id;
     private Integer categoryId;
     private String name;
